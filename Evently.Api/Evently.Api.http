@@ -1,0 +1,55 @@
+@Evently.Api_HostAddress = http://localhost:5072
+@Token = {{login.response.body.token}}
+
+# @name login
+POST {{Evently.Api_HostAddress}}/api/Users/login
+Content-Type: application/json
+
+{
+  "email": "admin@evently.com",
+  "password": "Admin@123"
+}
+
+###
+
+GET {{Evently.Api_HostAddress}}/api/Events
+Accept: application/json
+Authorization: Bearer {{Token}}
+
+###
+
+POST {{Evently.Api_HostAddress}}/api/Orders
+Content-Type: application/json
+Authorization: Bearer {{Token}}
+
+{
+  "eventId": "00000000-0000-0000-0000-000000000000",
+  "items": [
+    { "ticketTypeId": "00000000-0000-0000-0000-000000000000", "quantity": 1 }
+  ]
+}
+
+###
+
+POST {{Evently.Api_HostAddress}}/api/Payments/mock
+Content-Type: application/json
+Authorization: Bearer {{Token}}
+
+{
+  "orderId": "00000000-0000-0000-0000-000000000000"
+}
+
+###
+
+POST {{Evently.Api_HostAddress}}/api/Payments/webhook
+Content-Type: application/json
+X-Evently-Signature: sha256=<HMAC_SHA256_do_corpo_em_hex>
+
+{
+  "provider": "Mock",
+  "type": "payment.succeeded",
+  "orderId": "00000000-0000-0000-0000-000000000000",
+  "transactionId": "trx_1234567890",
+  "amount": 180.00,
+  "status": "Paid"
+}
